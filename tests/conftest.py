@@ -1,5 +1,3 @@
-from importlib.resources import files
-
 import pytest
 
 from nemo_spinup_forecast.dimensionality_reduction import (
@@ -9,20 +7,28 @@ from nemo_spinup_forecast.forecast import Predictions, Simulation, load_ts
 from nemo_spinup_forecast.forecast_method import forecast_techniques
 from nemo_spinup_forecast.utils import (
     create_run_dir,
-    get_dr_technique,
-    get_forecast_technique,
     prepare,
 )
 
-# Resolve packaged config file (no reliance on repo root layout)
-tech_cfg = files("nemo_spinup_forecast.configs").joinpath("techniques_config.yaml")
 
-dr_technique = get_dr_technique(tech_cfg, dimensionality_reduction_techniques)
-forecast_technique = get_forecast_technique(tech_cfg, forecast_techniques)
+@pytest.fixture(
+    params=list(dimensionality_reduction_techniques.values()),
+    ids=list(dimensionality_reduction_techniques.keys()),
+)
+def dr_technique(request):
+    return request.param  # a class (not instance)
+
+
+@pytest.fixture(
+    params=list(forecast_techniques.values()),
+    ids=list(forecast_techniques.keys()),
+)
+def forecast_technique(request):
+    return request.param  # already an instance
 
 
 @pytest.fixture()
-def setup_simulation_class(request):
+def setup_simulation_class(request, dr_technique):
     """Fixture to set up the simulation class."""
     # Parameters for the simulation class
     path = "tests/data/nemo_data_e3/"
@@ -47,7 +53,7 @@ def setup_simulation_class(request):
 
 
 @pytest.fixture()
-def setup_prediction_class(request, tmp_path):
+def setup_prediction_class(request, tmp_path, dr_technique, forecast_technique):
     """Fixture to set up a prediction class."""
     data_path = "tests/data/nemo_data_e3/"
 
