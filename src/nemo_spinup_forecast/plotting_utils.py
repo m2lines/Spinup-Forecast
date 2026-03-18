@@ -426,7 +426,12 @@ def plot_component_timeseries(
     for ax, simu, pred_item, name, color in zip(
         axes, ref, pred, names, colors, strict=True
     ):
-        ax.plot(simu.components[:, comp], color="grey", linestyle="dashed", label="ref")
+        ax.plot(
+            simu.components[:, comp],
+            color="grey",
+            linestyle="dashed",
+            label="ref (separate PCA fit)",
+        )
         # Training segment (dashed) — original data, not predicted.
         ax.plot(
             np.arange(0, train_len),
