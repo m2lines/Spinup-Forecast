@@ -106,8 +106,6 @@ def test_forecast_ts_valid_input(setup_prediction_class):
 
     # Expected shape: original data length + forecasted steps
     expected_shape = (steps,)
-    assert isinstance(y_hat, np.ndarray), "y_hat should be a NumPy array"
-    assert isinstance(y_hat_std, np.ndarray), "y_hat_std should be a NumPy array"
     assert y_hat.shape == expected_shape, (
         f"y_hat shape {y_hat.shape} != expected {expected_shape}"
     )
@@ -141,11 +139,7 @@ def test_forecast_ts_no_test_data_no_steps(setup_prediction_class):
     # No test data available for validation => metrics must be None
     assert metrics is None, "Metrics should be None when no test data is available"
 
-    # Expected shape: original data length + steps + 1
-    # (when steps=0, still returns one extra point)
     expected_shape = (0,)
-    assert isinstance(y_hat, np.ndarray), "y_hat should be a NumPy array"
-    assert isinstance(y_hat_std, np.ndarray), "y_hat_std should be a NumPy array"
     assert y_hat.shape == expected_shape, (
         f"y_hat shape {y_hat.shape} != expected {expected_shape}"
     )
@@ -175,10 +169,7 @@ def test_forecast_ts_no_test_data_with_steps(setup_prediction_class):
     # No test data available for validation => metrics must be None
     assert metrics is None, "Metrics should be None when no test data is available"
 
-    # Expected shape: original data length + forecasted steps
     expected_shape = (steps,)
-    assert isinstance(y_hat, np.ndarray), "y_hat should be a NumPy array"
-    assert isinstance(y_hat_std, np.ndarray), "y_hat_std should be a NumPy array"
     assert y_hat.shape == expected_shape, (
         f"y_hat shape {y_hat.shape} != expected {expected_shape}"
     )

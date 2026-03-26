@@ -128,8 +128,6 @@ class RecursiveForecaster(BaseForecaster):
         Number of lagged values of the target to include as features.
     window_size : int, default=10
         Size of the rolling window used to compute additional statistics.
-    steps : int, default=30
-        Number of future steps to forecast.
 
     Attributes
     ----------
@@ -139,11 +137,9 @@ class RecursiveForecaster(BaseForecaster):
         Number of lags used in forecasting.
     window_size : int
         Rolling window size for feature engineering.
-    steps : int
-        Horizon length for recursive forecasting.
     """
 
-    def __init__(self, regressor, lags=10, window_size=10, steps=30):
+    def __init__(self, regressor, lags=10, window_size=10):
         """
         Initialize the recursive forecaster.
 
@@ -155,15 +151,12 @@ class RecursiveForecaster(BaseForecaster):
             See class docstring.
         window_size : int, default=10
             See class docstring.
-        steps : int, default=30
-            See class docstring.
         """
         self.regressor = regressor
         self.lags = lags
         self.window_size = window_size
-        self.steps = steps
 
-    def apply_forecast(self, y_train, _x_train, _x_pred):
+    def apply_forecast(self, y_train, _x_train, x_pred):
         """
         Fit a recursive forecaster using the provided regressor.
 
@@ -171,10 +164,11 @@ class RecursiveForecaster(BaseForecaster):
         ----------
         y_train : array-like
             Training target series.
-        _x_train : array-like, optional
-            Not used directly in this recursive implementation.
-        _x_pred : array-like, optional
-            Not used directly in this recursive implementation.
+        _x_train : array-like
+            Not used in this recursive implementation.
+        x_pred : array-like
+            Feature matrix whose first dimension determines the number of
+            forecast steps.
 
         Returns
         -------
@@ -182,10 +176,10 @@ class RecursiveForecaster(BaseForecaster):
             ``(y_hat, y_hat_std)`` where:
 
             * **y_hat** : ndarray
-                Predicted values for the next `steps` periods.
+                Predicted values for ``x_pred.shape[0]`` periods.
             * **y_hat_std** : ndarray
-                Returned here as a placeholder equal to ``y_hat`` since the
-                recursive strategy used does not compute prediction intervals.
+                Placeholder equal to ``y_hat`` since the recursive strategy
+                does not compute prediction intervals.
 
         Notes
         -----
@@ -209,7 +203,8 @@ class RecursiveForecaster(BaseForecaster):
         forecaster.fit(pd.Series(y_train))
 
         # Predict the specified steps
-        y_hat = forecaster.predict(steps=self.steps)
+        steps = x_pred.shape[0]
+        y_hat = forecaster.predict(steps=steps)
 
         # Recursive forecaster does not return standard deviation for each point
         # Use y_hat as a placeholder for std
@@ -275,7 +270,7 @@ def create_gp_regressor(
 
 
 gp_recursive_forecaster = RecursiveForecaster(
-    create_gp_regressor(), lags=10, window_size=10, steps=30
+    create_gp_regressor(), lags=10, window_size=10
 )
 gp_forecaster = DirectForecaster(create_gp_regressor())
 
