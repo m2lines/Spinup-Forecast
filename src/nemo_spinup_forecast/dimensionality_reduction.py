@@ -538,7 +538,7 @@ class DimensionalityReductionKernelPCA(DimensionalityReduction):
 
         return reconstruction, rmse_values, rmse_map
 
-    def rmseValues(self, reconstruction):
+    def rmse_values(self, reconstruction):
         """RMSE per time sample.
 
         Parameters
