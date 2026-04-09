@@ -1,0 +1,4 @@
+DR_technique:
+  name: PCA
+Forecast_technique:
+  name: GaussianProcessForecaster
