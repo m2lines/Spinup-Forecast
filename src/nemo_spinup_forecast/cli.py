@@ -74,6 +74,19 @@ def main(argv=None) -> int:
 
     args = parser.parse_args(argv)
 
+    # Validate that the data path exists
+    data_path = Path(args.path).expanduser().resolve()
+    if not data_path.exists():
+        parser.error(
+            f"Data path does not exist: {args.path}\n"
+            "  Please check the path and try again.\n"
+        )
+    if not data_path.is_dir():
+        parser.error(
+            f"Data path is not a directory: {args.path}\n"
+            "  Please provide a path to the directory containing the simulation files."
+        )
+
     # Load config file of techniques
     if args.techniques_config:
         techniques_config_path = Path(args.techniques_config).expanduser().resolve()
