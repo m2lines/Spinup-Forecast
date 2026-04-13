@@ -47,25 +47,25 @@ def setup_simulation_class(request):
 
 
 @pytest.fixture()
-def setup_prediction_class(request):
+def setup_prediction_class(request, tmp_path):
     """Fixture to set up a prediction class."""
+    data_path = "tests/data/nemo_data_e3/"
+
     # create a per-run directory to store results
-    run_dir = create_run_dir("tests/data/nemo_data_e3/")
-    out_dir = run_dir / "forecasts"
+    out_dir = create_run_dir(str(tmp_path))
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # TODO: Reminder about handling index of tuple term, filename
     term, filename = request.param  # term to forecast, e.g., "ssh", "toce", "soce"
-    path = out_dir
     start = 20
     end = 50
     ye = True  # Indicates if the simulation is yearly
     comp = 0.9  # Explained variance ratio for PCA
 
     # Applies PCA and saves the results to disk
-    prepare(term, filename, path, start, end, ye, comp, dr_technique)
+    prepare(term, filename, data_path, out_dir, start, end, ye, comp, dr_technique)
 
-    df, infos = load_ts(f"{path}/simu_prepared/{term}", term)
+    df, infos = load_ts(f"{out_dir}/simu_prepared/{term}", term)
 
     simu_ts = Predictions(term, df, infos, forecast_technique, dr_technique)
 

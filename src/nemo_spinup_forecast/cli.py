@@ -25,7 +25,7 @@ def main(argv=None) -> int:
     """Entry point for the emulator CLI."""
     parser = argparse.ArgumentParser(description="Emulator")
     parser.add_argument(
-        "--path",
+        "--data-path",
         type=str,
         required=True,
         help="Path to simulation data to forecast from",
@@ -71,19 +71,25 @@ def main(argv=None) -> int:
         default=None,
         help="Path to techniques_config.yaml (overrides package default)",
     )
+    parser.add_argument(
+        "--output-path",
+        type=str,
+        required=True,
+        help="Directory to write forecast results to",
+    )
 
     args = parser.parse_args(argv)
 
     # Validate that the data path exists
-    data_path = Path(args.path).expanduser().resolve()
+    data_path = Path(args.data_path).expanduser().resolve()
     if not data_path.exists():
         parser.error(
-            f"Data path does not exist: {args.path}\n"
+            f"Data path does not exist: {args.data_path}\n"
             "  Please check the path and try again.\n"
         )
     if not data_path.is_dir():
         parser.error(
-            f"Data path is not a directory: {args.path}\n"
+            f"Data path is not a directory: {args.data_path}\n"
             "  Please provide a path to the directory containing the simulation files."
         )
 
@@ -104,8 +110,8 @@ def main(argv=None) -> int:
     )
 
     # Create a per-run directory to store results
-    run_dir = create_run_dir(args.path)
-    out_dir = run_dir / "forecasts"
+    run_dir = create_run_dir(args.output_path)
+    out_dir = run_dir / "forecast"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Convert comp to int or float if possible
@@ -141,7 +147,7 @@ def main(argv=None) -> int:
 
     run_pipeline(
         specs,
-        data_path=args.path,
+        data_path=args.data_path,
         out_dir=out_dir,
         start=args.start,
         end=args.end,

@@ -9,26 +9,26 @@ import yaml
 from nemo_spinup_forecast.forecast import Simulation
 
 
-def create_run_dir(base_path: str) -> Path:
+def create_run_dir(output_base: str) -> Path:
     """
     Create a new timestamped run directory and update the `latest` symlink.
 
-    A directory is created under ``<base_path>/forecasts/runs`` with a unique
+    A directory is created under ``<output_base>/runs`` with a unique
     timestamp-based name. After creation, the ``latest`` symlink in
-    ``<base_path>/forecasts`` is atomically updated to point to the new directory.
+    ``<output_base>`` is atomically updated to point to the new directory.
 
     Parameters
     ----------
-    base_path : str
-        Base path under which the run directories are stored.
+    output_base : str
+        Base output path under which the run directories are stored.
 
     Returns
     -------
     Path
         Path to the newly created run directory.
     """
-    base = Path(base_path).expanduser().resolve()
-    runs_root = base / "forecasts" / "runs"
+    base = Path(output_base).expanduser().resolve()
+    runs_root = base / "runs"
     runs_root.mkdir(parents=True, exist_ok=True)
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S.%fZ")
@@ -39,7 +39,7 @@ def create_run_dir(base_path: str) -> Path:
     run_dir.mkdir(parents=False, exist_ok=False)
 
     # Update 'latest' symlink atomically
-    _update_symlink_atomic(runs_root.parent, "latest", run_dir)
+    _update_symlink_atomic(base, "latest", run_dir)
     return run_dir
 
 
@@ -53,17 +53,19 @@ def _update_symlink_atomic(base: Path, name: str, target: Path):
     os.replace(tmp, final)
 
 
-def prepare(term, filename, simu_path, start, end, ye, comp, dr_technique):
+def prepare(term, filename, data_path, out_path, start, end, ye, comp, dr_technique):
     """
     Prepare the simulation for the forecast.
 
     Args:
         term (str): term to forecast
-        simu_path (str): path to the simulation
+        filename (str): name of the NetCDF file containing the term
+        data_path (str): path to the directory containing input .nc files
+        out_path (str): path to the run directory for writing results
         start (int): start of the simulation
         end (int): end of the simulation
         ye (bool): transform monthly simulation to yearly simulation
-        comp (int or float): explained variance ratio for the pcaA
+        comp (int or float): explained variance ratio for the PCA
 
     Returns
     -------
@@ -73,7 +75,7 @@ def prepare(term, filename, simu_path, start, end, ye, comp, dr_technique):
     # Load yearly or monthly simulations
 
     simu = Simulation(
-        path=str(simu_path.parents[3]),
+        path=str(data_path),
         start=start,
         end=end,
         ye=ye,
@@ -87,16 +89,16 @@ def prepare(term, filename, simu_path, start, end, ye, comp, dr_technique):
     simu.get_simulation_data()
     print(f"{term} prepared")
 
-    # Exctract time series through PCA
+    # Extract time series through PCA
     simu.decompose()
     print(f"PCA applied on {term}")
 
-    os.makedirs(f"{simu_path}/simu_prepared/{term}", exist_ok=True)
-    print(f"{simu_path}/simu_prepared/{term} created")
+    os.makedirs(f"{out_path}/simu_prepared/{term}", exist_ok=True)
+    print(f"{out_path}/simu_prepared/{term} created")
 
     # Create dictionary and save:
-    simu.save(f"{simu_path}/simu_prepared", term)
-    print(f"{term} saved at {simu_path}/simu_repared/{term}")
+    simu.save(f"{out_path}/simu_prepared", term)
+    print(f"{term} saved at {out_path}/simu_prepared/{term}")
 
     return simu
 

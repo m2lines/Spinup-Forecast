@@ -40,7 +40,7 @@ This project provides a flexible framework for oceanographic time‑series forec
 
 2. Run the forecasting script on the test data:
 
-    Set `path` to the directory where you downloaded the test data:
+    Set `--data-path` to the directory where you downloaded the test data and `--output-path` to where results should be written:
 
     ```bash
     python -m nemo_spinup_forecast \
@@ -49,7 +49,8 @@ This project provides a flexible framework for oceanographic time‑series forec
       --end 50 \
       --comp 1 \
       --steps 30 \
-      --path /path/to/simulation/files \
+      --data-path /path/to/simulation/files \
+      --output-path /path/to/output \
       --ocean-terms /path/to/ocean_terms.yaml \
       --techniques-config /path/to/techniques_config.yaml
     ```
@@ -57,19 +58,20 @@ This project provides a flexible framework for oceanographic time‑series forec
 
    ### Arguments
 
+   - **`data-path`** — Directory containing the simulation files
+   - **`output-path`** — Directory to write forecast results to
    - **`ye`** — The simulation is expressed in years (`True`) or months (`False`)
    - **`start`** — Starting year (training data)
    - **`end`** — Ending year (usually the last simulated year)
    - **`comp`** — Number or ratio of components to accelerate
    - **`steps`** — Jump size (years if `ye=True`, months otherwise)
-   - **`path`** — Directory containing the simulation files
    - **`ocean-terms`** — Path to a custom `ocean_terms.yaml` mapping logical terms (e.g., SSH, Salinity, Temperature) to dataset variable names. If omitted, a packaged default is used.
    - **`techniques-config`** — Path to a custom `techniques_config.yaml` selecting DR and forecast techniques. If omitted, the default packaged config directory is used.
 
    ### Outputs
 
-   - Prepared data in `forecasts/latest/simu_prepared/{term}/`
-   - Forecasted components in `forecasts/latest/simu_predicted/{term}.npy`
+   - Prepared data in `<output-path>/latest/forecast/simu_prepared/{term}/`
+   - Forecasted components in `<output-path>/latest/forecast/simu_predicted/{term}.npy`
 
 ---
 
@@ -272,7 +274,7 @@ There are 340 restart files per year. Each file contains a slice of the x and y 
 
 4. **Create the projected state** with the updated `main_forecast.py`. The DINO grid_T files are needed to run the forecast.
 
-    Set `path` to the NEMO/DINO data directory:
+    Set `data-path` to the NEMO/DINO data directory:
 
     ```bash
     python -m nemo_spinup_forecast \
@@ -281,17 +283,19 @@ There are 340 restart files per year. Each file contains a slice of the x and y 
       --end 50 \
       --comp 1 \
       --steps 30 \
-      --path /path/to/simulation/files \
+      --data-path /path/to/simulation/files \
+      --output-path /path/to/output \
       --ocean-terms /path/to/ocean_terms.yaml \
       --techniques-config /path/to/techniques_config.yaml
     ```
 
+   - **`data-path`** — Directory containing the simulation files
+   - **`output-path`** — Directory to write forecast results to
    - **`ye`** — The simulation is expressed in years (`True`) or months (`False`)
    - **`start`** — Starting year (training data)
    - **`end`** — Ending year (usually the last simulated year)
    - **`comp`** — Number or ratio of components to accelerate
    - **`steps`** — Jump size (years if `ye=True`, months otherwise)
-   - **`path`** — Directory containing the simulation files
    - **`ocean-terms`** — Path to a custom `ocean_terms.yaml` mapping logical terms (e.g., SSH, Salinity, Temperature) to dataset variable names. If omitted, a packaged default is used.
    - **`techniques-config`** — Path to a custom `techniques_config.yaml` selecting DR and forecast techniques. If omitted, the default packaged config directory is used.
 
