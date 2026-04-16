@@ -1,4 +1,10 @@
-Terms:
-  Salinity: soce
-  Temperature: toce
-  SSH: ssh
+terms:
+  salinity:
+    filename: DINO_1y_grid_T.nc
+    term: soce
+  temperature:
+    filename: DINO_1y_grid_T.nc
+    term: toce
+  ssh:
+    filename: DINO_1m_To_1y_grid_T.nc
+    term: ssh

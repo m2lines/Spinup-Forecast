@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 
 from nemo_spinup_forecast.forecast import Simulation
+from nemo_spinup_forecast.pipeline_utils import TermDef
 
 
 def create_run_dir(output_base: str) -> Path:
@@ -103,58 +104,57 @@ def prepare(term, filename, data_path, out_path, start, end, ye, comp, dr_techni
     return simu
 
 
-def get_ocean_term(ocean_property, yaml_path: Path | str | None = None):
-    """
-    Retrieve an ocean-related term from an ``ocean_terms.yaml`` file.
+def load_ocean_terms(yaml_path: Path | str | None = None) -> list[TermDef]:
+    """Load all ocean term definitions from an ocean_terms YAML config.
 
     Parameters
     ----------
-    ocean_property : str
-        The key of the term to retrieve from the YAML under the ``Terms`` section.
-        For example, ``"Temperature"`` to fetch the corresponding ocean temperature term.
     yaml_path : Path or str, optional
-        Optional path to a custom ``ocean_terms.yaml`` file. If not provided,
-        the function falls back to the packaged default file bundled with the
-        ``nemo_spinup_forecast`` package.
+        Path to a custom ocean_terms YAML file. Falls back to the packaged
+        ``ocean_terms.DINO.yaml`` when not provided.
 
     Returns
     -------
-    str or None
-        The term associated with the given property, or ``None`` if the file is missing
-        or the property is not defined.
+    list[TermDef]
+        One ``TermDef`` per entry in the YAML ``terms`` section, in
+        insertion order.
 
     Notes
     -----
     - When ``yaml_path`` is not provided, the function looks up the packaged
-      ``ocean_terms.yaml`` via importlib.resources.
-    - This function prints a short diagnostic message and returns ``None`` on failure.
+      ``ocean_terms.DINO.yaml`` via importlib.resources.
+    - This function prints a short diagnostic message and returns ``[]`` on failure.
     """
     try:
         if yaml_path is not None:
             yaml_path = Path(yaml_path).expanduser().resolve()
             with yaml_path.open("r") as f:
-                terms = yaml.safe_load(f)
+                raw = yaml.safe_load(f)
         else:
-            # Fall back to packaged resource
             config_file = files("nemo_spinup_forecast.configs").joinpath(
                 "ocean_terms.DINO.yaml"
             )
             with config_file.open("r") as f:
-                terms = yaml.safe_load(f)
+                raw = yaml.safe_load(f)
 
-        return terms["Terms"][ocean_property]
+        result = []
+        for key, props in raw["terms"].items():
+            result.append(
+                TermDef(key=key, term=props["term"], filename=props["filename"])
+            )
+        return result
 
     except FileNotFoundError:
         print(
             "\nCouldn't find 'ocean_terms.yaml'. Provide --ocean-terms path if needed.\n"
         )
-        return None
-    except KeyError:
+        return []
+    except KeyError as e:
         print(
-            f"\nThe term '{ocean_property}' was not found in the "
-            "'Terms' section of 'ocean_terms.yaml'.\n"
+            f"\nMissing key {e} in ocean_terms YAML. "
+            "Each entry needs 'term' and 'filename' sub-keys.\n"
         )
-        return None
+        return []
 
 
 def get_forecast_technique(yaml_path, forecast_techniques):

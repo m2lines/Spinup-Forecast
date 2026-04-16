@@ -12,12 +12,11 @@ from nemo_spinup_forecast.dimensionality_reduction import (
 )
 from nemo_spinup_forecast.forecast_method import forecast_techniques
 from nemo_spinup_forecast.pipeline import run_pipeline
-from nemo_spinup_forecast.pipeline_utils import TermDef
 from nemo_spinup_forecast.utils import (
     create_run_dir,
     get_dr_technique,
     get_forecast_technique,
-    get_ocean_term,
+    load_ocean_terms,
 )
 
 
@@ -126,24 +125,7 @@ def main(argv=None) -> int:
     ocean_terms_path: Path | None = (
         Path(args.ocean_terms).expanduser().resolve() if args.ocean_terms else None
     )
-    run_name = ""  # "kpca_recurGP_2nd_run_"
-    specs = [
-        TermDef(
-            key="ssh",
-            term=get_ocean_term("SSH", yaml_path=ocean_terms_path),
-            filename=f"DINO_{run_name}1m_To_1y_grid_T.nc",
-        ),
-        TermDef(
-            key="soce",
-            term=get_ocean_term("Salinity", yaml_path=ocean_terms_path),
-            filename=f"DINO_{run_name}1y_grid_T.nc",
-        ),
-        TermDef(
-            key="toce",
-            term=get_ocean_term("Temperature", yaml_path=ocean_terms_path),
-            filename=f"DINO_{run_name}1y_grid_T.nc",
-        ),
-    ]
+    specs = load_ocean_terms(ocean_terms_path)
 
     run_pipeline(
         specs,

@@ -8,18 +8,17 @@ from nemo_spinup_forecast.dimensionality_reduction import (
 )
 from nemo_spinup_forecast.forecast_method import forecast_techniques
 from nemo_spinup_forecast.pipeline import run_pipeline
-from nemo_spinup_forecast.pipeline_utils import TermDef
-from nemo_spinup_forecast.utils import get_dr_technique, get_forecast_technique
+from nemo_spinup_forecast.utils import (
+    get_dr_technique,
+    get_forecast_technique,
+    load_ocean_terms,
+)
 
 tech_cfg = files("nemo_spinup_forecast.configs").joinpath("techniques_config.yaml")
 dr_technique = get_dr_technique(tech_cfg, dimensionality_reduction_techniques)
 forecast_technique = get_forecast_technique(tech_cfg, forecast_techniques)
 
-SPECS = [
-    TermDef(key="ssh", term="ssh", filename="DINO_1m_To_1y_grid_T.nc"),
-    TermDef(key="toce", term="toce", filename="DINO_1y_grid_T.nc"),
-    TermDef(key="soce", term="soce", filename="DINO_1y_grid_T.nc"),
-]
+SPECS = load_ocean_terms()
 
 STEPS = 3
 
